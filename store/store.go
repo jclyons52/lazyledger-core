@@ -376,11 +376,12 @@ func (bs *BlockStore) SaveBlock(
 		part := blockParts.GetPart(i)
 		bs.saveBlockPart(height, i, part)
 	}
-
-	err := ipld.PutBlock(ctx, bs.dag, block, bs.routing, bs.logger)
-	if err != nil {
-		return err
-	}
+	go func() {
+		err := ipld.PutBlock(ctx, bs.dag, block, nil, bs.logger)
+		if err != nil {
+			bs.logger.Info("failure to put block while saving block")
+		}
+	}()
 
 	// Save block meta
 	blockMeta := types.NewBlockMeta(block, blockParts)
