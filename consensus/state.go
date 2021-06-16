@@ -1139,7 +1139,7 @@ func (cs *State) defaultDecideProposal(height int64, round int32) {
 		// the provide timeout could still be larger than just the time between
 		// two consecutive proposals.
 		//
-		// cs.proposalCancel()
+		cs.proposalCancel()
 	}
 	cs.proposalCtx, cs.proposalCancel = context.WithCancel(context.TODO())
 	go func(ctx context.Context) {
