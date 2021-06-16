@@ -33,7 +33,7 @@ func Embedded(init bool, cfg *Config, logger log.Logger) NodeProvider {
 		}
 		// Init Repo if requested
 		if init {
-			if err := InitRepo(path, logger); err != nil {
+			if err := InitRepo(path, logger, cfg.BootStrapPeers); err != nil {
 				return nil, err
 			}
 		}

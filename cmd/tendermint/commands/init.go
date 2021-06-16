@@ -100,5 +100,5 @@ func initFilesWithConfig(config *cfg.Config) error {
 	}
 
 	// TODO(ismail): add counter part in ResetAllCmd
-	return ipfs.InitRepo(config.IPFS.Path(), logger)
+	return ipfs.InitRepo(config.IPFS.Path(), logger, config.IPFS.BootStrapPeers)
 }

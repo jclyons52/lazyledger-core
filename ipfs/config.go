@@ -11,6 +11,8 @@ type Config struct {
 	// The default is ~/.tendermint/ipfs.
 	RepoPath string `mapstructure:"repo-path"`
 	ServeAPI bool   `mapstructure:"serve-api"`
+
+	BootStrapPeers []string
 }
 
 // DefaultConfig returns a default config different from the default IPFS config.
