@@ -52,32 +52,29 @@ func PutBlock(
 	if err != nil {
 		return fmt.Errorf("failure to recompute the extended data square: %w", err)
 	}
+
 	// get row and col roots to be provided
 	// this also triggers adding data to DAG
 	rowRoots := eds.RowRoots()
 	colRoots := eds.ColumnRoots()
-	var prov *provider
-	if croute != nil {
-		prov = newProvider(ctx, croute, int32(squareSize*4), logger.With("height", block.Height))
-		for _, root := range rowRoots {
-			prov.Provide(plugin.MustCidFromNamespacedSha256(root))
-		}
-		for _, root := range colRoots {
-			prov.Provide(plugin.MustCidFromNamespacedSha256(root))
-		}
-	}
 
 	// commit the batch to ipfs
 	err = batchAdder.Commit()
 	if err != nil {
 		return err
 	}
-	// wait until we provided all the roots if requested
-	if croute != nil {
-		<-prov.Done()
-		err = prov.Err()
+
+	prov := newProvider(ctx, croute, int32(squareSize*4), logger.With("height", block.Height))
+	for _, root := range rowRoots {
+		prov.Provide(plugin.MustCidFromNamespacedSha256(root))
 	}
-	return err
+	for _, root := range colRoots {
+		prov.Provide(plugin.MustCidFromNamespacedSha256(root))
+	}
+
+	// wait until we provided all the roots if requested
+	<-prov.Done()
+	return prov.Err()
 }
 
 var provideWorkers = 32
