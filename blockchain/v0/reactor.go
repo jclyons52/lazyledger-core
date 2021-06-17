@@ -182,7 +182,6 @@ func (bcR *BlockchainReactor) respondToPeer(msg *bcproto.BlockRequest,
 	block, err := bcR.store.LoadBlock(context.TODO(), msg.Height)
 	if err != nil {
 		bcR.Logger.Error("failure to load block", "err", err)
-		return false
 	}
 	if block != nil {
 		bl, err := block.ToProto()

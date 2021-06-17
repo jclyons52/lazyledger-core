@@ -465,7 +465,7 @@ func (h *Handshaker) replayBlocks(
 		h.logger.Info("Applying block", "height", i)
 		block, err := h.store.LoadBlock(context.TODO(), i)
 		if err != nil {
-			return nil, err
+			h.logger.Info("failure to load block during replay:", err)
 		}
 		// Extra check to ensure the app was not changed in a way it shouldn't have.
 		if len(appHash) > 0 {
@@ -497,7 +497,7 @@ func (h *Handshaker) replayBlocks(
 func (h *Handshaker) replayBlock(state sm.State, height int64, proxyApp proxy.AppConnConsensus) (sm.State, error) {
 	block, err := h.store.LoadBlock(context.TODO(), height)
 	if err != nil {
-		return sm.State{}, err
+		h.logger.Info("failure to load block during handshake replay:", err)
 	}
 	meta := h.store.LoadBlockMeta(height)
 

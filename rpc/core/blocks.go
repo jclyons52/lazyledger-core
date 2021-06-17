@@ -95,10 +95,8 @@ func Block(ctx *rpctypes.Context, heightPtr *int64) (*ctypes.ResultBlock, error)
 		return &ctypes.ResultBlock{BlockID: types.BlockID{}, Block: nil}, nil
 	}
 
-	block, err := env.BlockStore.LoadBlock(context.TODO(), height)
-	if err != nil {
-		return nil, err
-	}
+	// todo(evan): do something with this error
+	block, _ := env.BlockStore.LoadBlock(context.TODO(), height)
 
 	return &ctypes.ResultBlock{BlockID: blockMeta.BlockID, Block: block}, nil
 }
@@ -106,10 +104,10 @@ func Block(ctx *rpctypes.Context, heightPtr *int64) (*ctypes.ResultBlock, error)
 // BlockByHash gets block by hash.
 // More: https://docs.tendermint.com/master/rpc/#/Info/block_by_hash
 func BlockByHash(ctx *rpctypes.Context, hash []byte) (*ctypes.ResultBlock, error) {
-	block, err := env.BlockStore.LoadBlockByHash(context.TODO(), hash)
-	if err != nil {
-		return nil, err
-	}
+	block, _ := env.BlockStore.LoadBlockByHash(context.TODO(), hash)
+	// if err != nil {
+	// 	return nil, err
+	// }
 	if block == nil {
 		return &ctypes.ResultBlock{BlockID: types.BlockID{}, Block: nil}, nil
 	}
@@ -158,7 +156,7 @@ func DataAvailabilityHeader(ctx *rpctypes.Context, heightPtr *int64) (*ctypes.Re
 	// - https://github.com/lazyledger/lazyledger-core/pull/218
 	block, err := env.BlockStore.LoadBlock(context.TODO(), height)
 	if err != nil {
-		return nil, err
+		fmt.Println("loading block error for dah rpc call", err)
 	}
 	_ = block.Hash()
 	dah := block.DataAvailabilityHeader
