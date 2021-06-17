@@ -15,6 +15,7 @@ import (
 	"github.com/ipfs/go-merkledag"
 	"github.com/libp2p/go-libp2p-core/routing"
 
+	"github.com/lazyledger/lazyledger-core/ipfs"
 	dbm "github.com/lazyledger/lazyledger-core/libs/db"
 	"github.com/lazyledger/lazyledger-core/libs/log"
 	tmsync "github.com/lazyledger/lazyledger-core/libs/sync"
@@ -117,7 +118,8 @@ func (bs *BlockStore) LoadBlock(ctx context.Context, height int64) (*types.Block
 	blockMeta := bs.LoadBlockMeta(height)
 	if blockMeta == nil {
 		// TODO(evan): return an error
-		return nil, nil
+		bs.logger.Info("block meta not found")
+		return nil, fmt.Errorf("block not found for height %d", height)
 	}
 
 	lastCommit := bs.LoadBlockCommit(height - 1)
@@ -127,6 +129,7 @@ func (bs *BlockStore) LoadBlock(ctx context.Context, height int64) (*types.Block
 		if strings.Contains(err.Error(), format.ErrNotFound.Error()) {
 			return nil, fmt.Errorf("failure to retrieve block data from local ipfs store: %w", err)
 		}
+		bs.logger.Info("failure to retrieve block data", err)
 		return nil, err
 	}
 
@@ -376,12 +379,11 @@ func (bs *BlockStore) SaveBlock(
 		part := blockParts.GetPart(i)
 		bs.saveBlockPart(height, i, part)
 	}
-	go func() {
-		err := ipld.PutBlock(ctx, bs.dag, block, nil, bs.logger)
-		if err != nil {
-			bs.logger.Info("failure to put block while saving block")
-		}
-	}()
+
+	err := ipld.PutBlock(ctx, bs.dag, block, ipfs.MockRouting(), bs.logger)
+	if err != nil {
+		bs.logger.Info("failure to put block while saving block")
+	}
 
 	// Save block meta
 	blockMeta := types.NewBlockMeta(block, blockParts)
